@@ -39,8 +39,10 @@ bool motorAForward = true;  // determinate motor A direction (not to burn the mo
 bool motorBForward = true;  // determinate motor B direction (not to burn the motor driver)
 */
 
-int throttleIndex = 0;    // 0% => stop, 100% => full power
+int throttleIndex = 0;   // 0% => stop, 100% => full power
 int motorDirection = 0;  // -1 => reverse, 0 => stop, 1 => forward
+int motorAIndex = 0;     // left  motor index, 0% => stop, 100% full power
+int motorBIndex = 0;     // right motor index, 0% => stop, 100% full power
 
 // Define custom functions
 
@@ -68,12 +70,15 @@ void loop() {
   getForwardReverse = (getForwardReverse > highPositive) ? highPositive : getForwardReverse;
 
   // Write current state of the received values => simple parsing
+  /* ***** D E P R E C A T E D - C O D E *****
   if (carOn == true) {
     Serial.print("Car is ON\t|");
   } else {
     Serial.print("Car is OFF\t|");
   }
+  */
 
+  /* ***** D E P R E C A T E D - C O D E *****
   if (getLeftRight < highNegative) {
     Serial.print(" Left   |");
   } else if (getLeftRight > lowPositive) {
@@ -81,6 +86,7 @@ void loop() {
   } else {
     Serial.print(" Center |");
   }
+  */
 
   /* ***** D E P R E C A T E D - C O D E *****
   if (getForwardReverse < highNegative) {
@@ -90,15 +96,17 @@ void loop() {
   } else {
     Serial.print(" Stop    |");
   }
-*/
+  */
 
   // real parsing of the code, used to move the car in the desired direction
   if (carOn == true) {
 
+    Serial.print("Car is ON  |");
+
     // get the throttle index, that is the persentage of throttle the driver behing the TX want
     if ((motorDirection < 0 && getForwardReverse >= highNegative) || (motorDirection > 0 && getForwardReverse <= lowPositive)) {
       // STOP => we are changing direction and would not want to overload the motor driver
-      motorDirection = 5;  // <= has to be "0", we are using other number just to debug this state
+      motorDirection = 0;  // <= has to be "0", we are using other number just to debug this state
       throttleIndex = 0;
       delay(1000);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
     } else if (getForwardReverse < lowPositive && getForwardReverse > highNegative) {
@@ -120,27 +128,36 @@ void loop() {
     Serial.print(" | ");
     Serial.print(throttleIndex);
     Serial.print(" | ");
+
+    if (getLeftRight <= lowPositive && getLeftRight >= highNegative) {
+      // CENTER
+      motorAIndex = 100;
+      motorBIndex = 100;
+    } else if (getLeftRight < highNegative) {
+      // LEFT
+      motorAIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
+      motorBIndex = 100;
+    } else if (getLeftRight > lowPositive) {
+      // RIGHT
+      motorAIndex = 100;
+      motorBIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
+    }
+
+    (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
+    (motorAIndex >= 10 && motorAIndex < 100) ? Serial.print(" ") : Serial.print("");
+    Serial.print(motorAIndex);
+    Serial.print(" | ");
+    (motorBIndex >= 0 && motorBIndex < 10) ? Serial.print("  ") : Serial.print("");
+    (motorBIndex >= 10 && motorBIndex < 100) ? Serial.print(" ") : Serial.print("");
+    Serial.print(motorBIndex);
+    Serial.print(" | ");
+
+
+  } else {
+    motorDirection = 0;
+    throttleIndex = 0;
+    Serial.print("Car is OFF |");
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   Serial.println();
   delay(10);

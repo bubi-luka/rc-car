@@ -44,6 +44,10 @@
 - calculate motor power from receiver data
 
 ## Change Log
+### 0.2.1
+- optimize data parsing
+- detect critical points and act accordingly to prevent motor damage
+
 ### 0.2.0
 - get data from the receiver
 - parse data into human readable from
