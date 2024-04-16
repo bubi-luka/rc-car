@@ -44,6 +44,9 @@
 - calculate motor power from receiver data
 
 ## Change Log
+### 0.2.2
+- combine throttle and turn indexes into unified motor power for each motor
+
 ### 0.2.1
 - optimize data parsing
 - detect critical points and act accordingly to prevent motor damage

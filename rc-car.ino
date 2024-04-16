@@ -106,9 +106,9 @@ void loop() {
     // get the throttle index, that is the persentage of throttle the driver behing the TX want
     if ((motorDirection < 0 && getForwardReverse >= highNegative) || (motorDirection > 0 && getForwardReverse <= lowPositive)) {
       // STOP => we are changing direction and would not want to overload the motor driver
-      motorDirection = 0;  // <= has to be "0", we are using other number just to debug this state
+      motorDirection = 0;
       throttleIndex = 0;
-      delay(1000);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
+      delay(2000);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
     } else if (getForwardReverse < lowPositive && getForwardReverse > highNegative) {
       // STOP => the TX stick is in neutral position
       motorDirection = 0;
@@ -129,6 +129,7 @@ void loop() {
     Serial.print(throttleIndex);
     Serial.print(" | ");
 
+    // get the turning index as initial index of power for each motor
     if (getLeftRight <= lowPositive && getLeftRight >= highNegative) {
       // CENTER
       motorAIndex = 100;
@@ -152,6 +153,20 @@ void loop() {
     Serial.print(motorBIndex);
     Serial.print(" | ");
 
+    // calculate final power for each motor by multiply throttle and turn index for each motor
+    motorAIndex = motorAIndex * throttleIndex;
+    motorBIndex = motorBIndex * throttleIndex;
+    motorAIndex = map(motorAIndex, 0, 10000, 0, 100);
+    motorBIndex = map(motorBIndex, 0, 10000, 0, 100);
+
+    (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
+    (motorAIndex >= 10 && motorAIndex < 100) ? Serial.print(" ") : Serial.print("");
+    Serial.print(motorAIndex);
+    Serial.print(" | ");
+    (motorBIndex >= 0 && motorBIndex < 10) ? Serial.print("  ") : Serial.print("");
+    (motorBIndex >= 10 && motorBIndex < 100) ? Serial.print(" ") : Serial.print("");
+    Serial.print(motorBIndex);
+    Serial.print(" | ");
 
   } else {
     motorDirection = 0;
