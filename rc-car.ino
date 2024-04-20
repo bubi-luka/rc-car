@@ -17,6 +17,10 @@
 
 // Define Arduino pins
 static const int receiverPin = 3;
+static const int motorA1Pin = 5;
+static const int motorA2Pin = 6;
+static const int motorB1Pin = 10;
+static const int motorB2Pin = 11;
 
 // Define new objects
 
@@ -27,10 +31,10 @@ static const int receiverPin = 3;
 
 // in theory the signal can go from 1000 (low) to 1500 (neutral) and from 1500 (neutral) to 2000 (high)
 // but in reallity those values can vary so we use user defined constants
-static const int lowNegative = 980;    // lowest signal received
-static const int highNegative = 1450;  // low breaking point for neutral signal
-static const int lowPositive = 1550;   // high breaking point for neutral signal
-static const int highPositive = 2020;  // highest signal received
+static const int lowNegative = 1050;   // lowest signal received
+static const int highNegative = 1400;  // low breaking point for neutral signal
+static const int lowPositive = 1600;   // high breaking point for neutral signal
+static const int highPositive = 1950;  // highest signal received
 
 // Define variables
 bool carOn = false;  // kill switch
@@ -45,6 +49,52 @@ int motorAIndex = 0;     // left  motor index, 0% => stop, 100% full power
 int motorBIndex = 0;     // right motor index, 0% => stop, 100% full power
 
 // Define custom functions
+void runMotorA(int throttle, int direction) {
+
+  // throttle is general, does not know if it is forward or reversed,
+  // we need direction to correctly turn the motor
+  if (direction == 1) {
+    // FORWARD
+    analogWrite(motorA1Pin, throttle);
+    analogWrite(motorA2Pin, 0);
+  } else if (direction == -1) {
+    // REVERSE
+    analogWrite(motorA1Pin, 0);
+    analogWrite(motorA2Pin, throttle);
+  }
+}
+
+void runMotorB(int throttle, int direction) {
+
+  // throttle is general, does not know if it is forward or reversed,
+  // we need direction to correctly turn the motor
+  if (direction == 1) {
+    // FORWARD
+    analogWrite(motorB1Pin, throttle);
+    analogWrite(motorB2Pin, 0);
+  } else if (direction == -1) {
+    // REVERSE
+    analogWrite(motorB1Pin, 0);
+    analogWrite(motorB2Pin, throttle);
+  }
+}
+
+void stopBothMotors(bool motorBreak) {
+
+  // true if break (both HIGH), false is stop (both LOW)
+  if (motorBreak == true) {
+    digitalWrite(motorA1Pin, HIGH);
+    digitalWrite(motorA2Pin, HIGH);
+    digitalWrite(motorB1Pin, HIGH);
+    digitalWrite(motorB2Pin, HIGH);
+  } else {
+    digitalWrite(motorA1Pin, LOW);
+    digitalWrite(motorA2Pin, LOW);
+    digitalWrite(motorB1Pin, LOW);
+    digitalWrite(motorB2Pin, LOW);
+  }
+  delay(2000);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
+}
 
 // Initialization function, run only once
 void setup() {
@@ -108,7 +158,7 @@ void loop() {
       // STOP => we are changing direction and would not want to overload the motor driver
       motorDirection = 0;
       throttleIndex = 0;
-      delay(2000);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
+      stopBothMotors(false);
     } else if (getForwardReverse < lowPositive && getForwardReverse > highNegative) {
       // STOP => the TX stick is in neutral position
       motorDirection = 0;
@@ -136,12 +186,22 @@ void loop() {
       motorBIndex = 100;
     } else if (getLeftRight < highNegative) {
       // LEFT
-      motorAIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
-      motorBIndex = 100;
+      if (motorDirection == -1) {
+        motorAIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
+        motorBIndex = 100;
+      } else if (motorDirection == 1) {
+        motorAIndex = 100;
+        motorBIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
+      }
     } else if (getLeftRight > lowPositive) {
       // RIGHT
-      motorAIndex = 100;
-      motorBIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
+      if (motorDirection == -1) {
+        motorAIndex = 100;
+        motorBIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
+      } else if (motorDirection == 1) {
+        motorAIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
+        motorBIndex = 100;
+      }
     }
 
     (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
@@ -158,6 +218,8 @@ void loop() {
     motorBIndex = motorBIndex * throttleIndex;
     motorAIndex = map(motorAIndex, 0, 10000, 0, 100);
     motorBIndex = map(motorBIndex, 0, 10000, 0, 100);
+    //motorAIndex = map(motorAIndex, 0, 10000, 0, 255);
+    //motorBIndex = map(motorBIndex, 0, 10000, 0, 255);
 
     (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
     (motorAIndex >= 10 && motorAIndex < 100) ? Serial.print(" ") : Serial.print("");
@@ -168,9 +230,12 @@ void loop() {
     Serial.print(motorBIndex);
     Serial.print(" | ");
 
+    runMotorA(motorAIndex, motorDirection);
+    runMotorB(motorBIndex, motorDirection);
   } else {
     motorDirection = 0;
     throttleIndex = 0;
+    stopBothMotors(true);
     Serial.print("Car is OFF |");
   }
 
