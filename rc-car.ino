@@ -7,7 +7,7 @@
  * structure of the car useful again.
  *
  * Licence: GPL 3.0       (details in project file "LICENCE")
- * Version: 0.1.0         (details in project file "README.md")
+ * Version: 0.3.1         (details in project file "README.md")
  * created: 14. 04. 2024
  * by:      Luka Oman
  * *************************************************************************** */
@@ -25,7 +25,8 @@ static const int motorB2Pin = 11;
 // Define new objects
 
 // Define constants
-#define channelSafeMode 6        // kill switch
+#define channelSafeMode 5        // kill switch
+#define channelSpeedLevel 6      // three position switch for controling maximum speed
 #define channelLeftRight 1       // turn left or right
 #define channelForwardReverse 2  // go forward or reverse
 
@@ -93,7 +94,7 @@ void stopBothMotors(bool motorBreak) {
     digitalWrite(motorB1Pin, LOW);
     digitalWrite(motorB2Pin, LOW);
   }
-  delay(2000);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
+  delay(500);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
 }
 
 // Initialization function, run only once
@@ -107,6 +108,7 @@ void loop() {
 
   // get channels values
   short getSafeMode = ppm.read_channel(channelSafeMode);
+  short getSpeedLevel = ppm.read_channel(channelSpeedLevel);
   short getLeftRight = ppm.read_channel(channelLeftRight);
   short getForwardReverse = ppm.read_channel(channelForwardReverse);
 
@@ -216,10 +218,23 @@ void loop() {
     // calculate final power for each motor by multiply throttle and turn index for each motor
     motorAIndex = motorAIndex * throttleIndex;
     motorBIndex = motorBIndex * throttleIndex;
-    motorAIndex = map(motorAIndex, 0, 10000, 0, 100);
-    motorBIndex = map(motorBIndex, 0, 10000, 0, 100);
-    //motorAIndex = map(motorAIndex, 0, 10000, 0, 255);
-    //motorBIndex = map(motorBIndex, 0, 10000, 0, 255);
+
+    //calculate final throttle level
+    float finalThrottleLevel = 0;
+    if (getSpeedLevel < highNegative) {
+      finalThrottleLevel = 0.33;
+    } else if (getSpeedLevel >= highNegative && getSpeedLevel <= lowPositive) {
+      finalThrottleLevel = 0.66;
+    } else {
+      finalThrottleLevel = 1;
+    }
+
+    Serial.print(" |");
+    Serial.print(255 * finalThrottleLevel);
+    Serial.print(" |");
+
+    motorAIndex = map(motorAIndex, 0, 10000, 0, 255 * finalThrottleLevel);
+    motorBIndex = map(motorBIndex, 0, 10000, 0, 255 * finalThrottleLevel);
 
     (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
     (motorAIndex >= 10 && motorAIndex < 100) ? Serial.print(" ") : Serial.print("");

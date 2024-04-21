@@ -40,10 +40,13 @@
 ### 0.4.0
 - code optimization
 
+## Change Log
+### 0.3.1
+- parse signal from three position switch to control maximum throttle as 33%, 66% and 100% of the full throttle
+
 ### 0.3.0
 - calculate motor power from receiver data
 
-## Change Log
 ### 0.2.2
 - combine throttle and turn indexes into unified motor power for each motor
 
