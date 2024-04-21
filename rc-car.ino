@@ -7,13 +7,27 @@
  * structure of the car useful again.
  *
  * Licence: GPL 3.0       (details in project file "LICENCE")
- * Version: 0.3.1         (details in project file "README.md")
+ * Version: 0.3.2         (details in project file "README.md")
  * created: 14. 04. 2024
  * by:      Luka Oman
  * *************************************************************************** */
 
 // Declare additional libraries
 #include <ppm.h>
+
+// Define debuging messages
+#define DebugOn //comment to not run debug
+
+#ifndef DebugOn
+  #define DebugBegin(x)
+  #define DebugPrint(x)
+  #define DebugPrintln(x)
+#else
+  #define DebugBegin(x) Serial.begin(x)
+  #define DebugPrint(x) Serial.print(x)
+  #define DebugPrintln(x) Serial.println(x)
+#endif
+
 
 // Define Arduino pins
 static const int receiverPin = 3;
@@ -99,7 +113,7 @@ void stopBothMotors(bool motorBreak) {
 
 // Initialization function, run only once
 void setup() {
-  Serial.begin(9600);
+  DebugBegin(9600);
   ppm.begin(receiverPin, false);
 }
 
@@ -124,36 +138,36 @@ void loop() {
   // Write current state of the received values => simple parsing
   /* ***** D E P R E C A T E D - C O D E *****
   if (carOn == true) {
-    Serial.print("Car is ON\t|");
+    DebugPrint("Car is ON\t|");
   } else {
-    Serial.print("Car is OFF\t|");
+    DebugPrint("Car is OFF\t|");
   }
   */
 
   /* ***** D E P R E C A T E D - C O D E *****
   if (getLeftRight < highNegative) {
-    Serial.print(" Left   |");
+    DebugPrint(" Left   |");
   } else if (getLeftRight > lowPositive) {
-    Serial.print(" Right  |");
+    DebugPrint(" Right  |");
   } else {
-    Serial.print(" Center |");
+    DebugPrint(" Center |");
   }
   */
 
   /* ***** D E P R E C A T E D - C O D E *****
   if (getForwardReverse < highNegative) {
-    Serial.print(" Reverse |");
+    DebugPrint(" Reverse |");
   } else if (getForwardReverse > lowPositive) {
-    Serial.print(" Forward |");
+    DebugPrint(" Forward |");
   } else {
-    Serial.print(" Stop    |");
+    DebugPrint(" Stop    |");
   }
   */
 
   // real parsing of the code, used to move the car in the desired direction
   if (carOn == true) {
 
-    Serial.print("Car is ON  |");
+    DebugPrint(F("Car is ON  |"));
 
     // get the throttle index, that is the persentage of throttle the driver behing the TX want
     if ((motorDirection < 0 && getForwardReverse >= highNegative) || (motorDirection > 0 && getForwardReverse <= lowPositive)) {
@@ -175,11 +189,16 @@ void loop() {
       motorDirection = -1;
     }
 
-    (motorDirection >= 0) ? Serial.print("  ") : Serial.print(" ");
-    Serial.print(motorDirection);
-    Serial.print(" | ");
-    Serial.print(throttleIndex);
-    Serial.print(" | ");
+    if (motorDirection >= 0) {
+      DebugPrint(F("  "));
+    } else {
+      DebugPrint(F(" "));
+    }
+
+    DebugPrint(motorDirection);
+    DebugPrint(F(" | "));
+    DebugPrint(throttleIndex);
+    DebugPrint(F(" | "));
 
     // get the turning index as initial index of power for each motor
     if (getLeftRight <= lowPositive && getLeftRight >= highNegative) {
@@ -206,14 +225,33 @@ void loop() {
       }
     }
 
-    (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
-    (motorAIndex >= 10 && motorAIndex < 100) ? Serial.print(" ") : Serial.print("");
-    Serial.print(motorAIndex);
-    Serial.print(" | ");
-    (motorBIndex >= 0 && motorBIndex < 10) ? Serial.print("  ") : Serial.print("");
-    (motorBIndex >= 10 && motorBIndex < 100) ? Serial.print(" ") : Serial.print("");
-    Serial.print(motorBIndex);
-    Serial.print(" | ");
+    if (motorAIndex >= 0 && motorAIndex < 10) {
+      DebugPrint(F("  "));
+    } else {
+      DebugPrint(F(""));
+    }
+    if (motorAIndex >= 10 && motorAIndex < 100) {
+      DebugPrint(F(" "));
+    } else {
+      DebugPrint(F(""));
+    }
+
+    DebugPrint(motorAIndex);
+    DebugPrint(F(" | "));
+
+    if (motorBIndex >= 0 && motorBIndex < 10) {
+      DebugPrint(F("  "));
+    } else {
+      DebugPrint(F(""));
+    }
+    if (motorBIndex >= 10 && motorBIndex < 100) {
+      DebugPrint(F(" "));
+    } else {
+      DebugPrint(F(""));
+    }
+
+    DebugPrint(motorBIndex);
+    DebugPrint(F(" | "));
 
     // calculate final power for each motor by multiply throttle and turn index for each motor
     motorAIndex = motorAIndex * throttleIndex;
@@ -229,21 +267,40 @@ void loop() {
       finalThrottleLevel = 1;
     }
 
-    Serial.print(" |");
-    Serial.print(255 * finalThrottleLevel);
-    Serial.print(" |");
+    DebugPrint(" |");
+    DebugPrint(255 * finalThrottleLevel);
+    DebugPrint(" |");
 
     motorAIndex = map(motorAIndex, 0, 10000, 0, 255 * finalThrottleLevel);
     motorBIndex = map(motorBIndex, 0, 10000, 0, 255 * finalThrottleLevel);
 
-    (motorAIndex >= 0 && motorAIndex < 10) ? Serial.print("  ") : Serial.print("");
-    (motorAIndex >= 10 && motorAIndex < 100) ? Serial.print(" ") : Serial.print("");
-    Serial.print(motorAIndex);
-    Serial.print(" | ");
-    (motorBIndex >= 0 && motorBIndex < 10) ? Serial.print("  ") : Serial.print("");
-    (motorBIndex >= 10 && motorBIndex < 100) ? Serial.print(" ") : Serial.print("");
-    Serial.print(motorBIndex);
-    Serial.print(" | ");
+    if (motorAIndex >= 0 && motorAIndex < 10) {
+      DebugPrint(F("  "));
+    } else {
+      DebugPrint(F(""));
+    }
+    if (motorAIndex >= 10 && motorAIndex < 100) {
+      DebugPrint(F(" "));
+    } else {
+      DebugPrint(F(""));
+    }
+
+    DebugPrint(motorAIndex);
+    DebugPrint(F(" | "));
+
+    if (motorBIndex >= 0 && motorBIndex < 10) {
+      DebugPrint(F("  "));
+    } else {
+      DebugPrint(F(""));
+    }
+    if (motorBIndex >= 10 && motorBIndex < 100) {
+      DebugPrint(F(" "));
+    } else {
+      DebugPrint(F(""));
+    }
+
+    DebugPrint(motorBIndex);
+    DebugPrint(F(" | "));
 
     runMotorA(motorAIndex, motorDirection);
     runMotorB(motorBIndex, motorDirection);
@@ -251,9 +308,9 @@ void loop() {
     motorDirection = 0;
     throttleIndex = 0;
     stopBothMotors(true);
-    Serial.print("Car is OFF |");
+    DebugPrint(F("Car is OFF |"));
   }
 
-  Serial.println();
+  DebugPrintln();
   delay(10);
 }

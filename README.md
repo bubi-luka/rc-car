@@ -41,6 +41,10 @@
 - code optimization
 
 ## Change Log
+### 0.3.2
+- the compiler does not compile Serial.print() and Serial.println() statements when we do not need them
+- the compiler compile whole code when we are debugging the code
+
 ### 0.3.1
 - parse signal from three position switch to control maximum throttle as 33%, 66% and 100% of the full throttle
 
