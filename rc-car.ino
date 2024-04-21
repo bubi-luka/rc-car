@@ -16,16 +16,16 @@
 #include <ppm.h>
 
 // Define debuging messages
-#define DebugOn //comment to not run debug
+//#define DebugOn  //comment to not run debug
 
 #ifndef DebugOn
-  #define DebugBegin(x)
-  #define DebugPrint(x)
-  #define DebugPrintln(x)
+#define DebugBegin(x)
+#define DebugPrint(x)
+#define DebugPrintln(x)
 #else
-  #define DebugBegin(x) Serial.begin(x)
-  #define DebugPrint(x) Serial.print(x)
-  #define DebugPrintln(x) Serial.println(x)
+#define DebugBegin(x) Serial.begin(x)
+#define DebugPrint(x) Serial.print(x)
+#define DebugPrintln(x) Serial.println(x)
 #endif
 
 
@@ -184,7 +184,7 @@ void loop() {
       throttleIndex = map(getForwardReverse, lowPositive, highPositive, 0, 100);
       motorDirection = 1;
     } else if (getForwardReverse <= highNegative) {
-      // REVERSED
+      // REVERSE
       throttleIndex = map(getForwardReverse, highNegative, lowNegative, 0, 100);
       motorDirection = -1;
     }
@@ -207,22 +207,26 @@ void loop() {
       motorBIndex = 100;
     } else if (getLeftRight < highNegative) {
       // LEFT
-      if (motorDirection == -1) {
-        motorAIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
-        motorBIndex = 100;
-      } else if (motorDirection == 1) {
-        motorAIndex = 100;
-        motorBIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
-      }
+      //      if (motorDirection == -1) {
+      //        // REVERSE
+      //        motorAIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
+      //        motorBIndex = 100;
+      //      } else if (motorDirection == 1) {
+      //        // FORWARD
+      motorAIndex = 100;
+      motorBIndex = map(getLeftRight, lowNegative, highNegative, 0, 100);
+      //      }
     } else if (getLeftRight > lowPositive) {
       // RIGHT
-      if (motorDirection == -1) {
-        motorAIndex = 100;
-        motorBIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
-      } else if (motorDirection == 1) {
-        motorAIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
-        motorBIndex = 100;
-      }
+      //      if (motorDirection == -1) {
+      //        // REVERSE
+      //        motorAIndex = 100;
+      //        motorBIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
+      //      } else if (motorDirection == 1) {
+      //        // FORWARD
+      motorAIndex = map(getLeftRight, lowPositive, highPositive, 100, 0);
+      motorBIndex = 100;
+      //      }
     }
 
     if (motorAIndex >= 0 && motorAIndex < 10) {

@@ -41,6 +41,9 @@
 - code optimization
 
 ## Change Log
+### 0.3.3
+- reverse the turning of a car when in reverse
+
 ### 0.3.2
 - the compiler does not compile Serial.print() and Serial.println() statements when we do not need them
 - the compiler compile whole code when we are debugging the code
