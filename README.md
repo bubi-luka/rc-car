@@ -37,10 +37,12 @@
 ### 1.0.0
 - code cleanup
 
-### 0.4.0
-- code optimization
-
 ## Change Log
+### 0.4.0
+- rewrite parts of code for turning the car
+- removal of more deprecated code
+- better debugging messages
+
 ### 0.3.4
 - removal of deprecated code
 
