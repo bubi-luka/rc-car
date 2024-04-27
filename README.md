@@ -38,6 +38,13 @@
 - code cleanup
 
 ## Change Log
+### 0.4.1
+- sometimes the RC gives wrong values and the car turned Off
+- this update introduces a workaround that puts a counter on wheather the car should turn Off
+- if there are five consecutive signals to turn the car off we turn it off
+- we do not use delay to read the signal from receiver
+- we still have hard delay of 0.5 second when changing forward and reverse
+
 ### 0.4.0
 - rewrite parts of code for turning the car
 - removal of more deprecated code
@@ -63,7 +70,7 @@
 - combine throttle and turn indexes into unified motor power for each motor
 
 ### 0.2.1
-- optimize data parsing
+- optimise data parsing
 - detect critical points and act accordingly to prevent motor damage
 
 ### 0.2.0
