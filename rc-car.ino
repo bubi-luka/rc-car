@@ -6,27 +6,28 @@
  * an iA6C receiver module and a power step-down module to make use of the 
  * structure of the car useful again.
  *
- * Licence: GPL 3.0       (details in project file "LICENCE")
- * Version: 0.3.2         (details in project file "README.md")
- * created: 14. 04. 2024
- * by:      Luka Oman
+ * Licence:  GPL 3.0       (details in project file "LICENCE")
+ * Version:  0.3.4         (details in project file "README.md")
+ * created:  14. 04. 2024
+ * modified: 27. 04. 2024
+ * by:       Luka Oman
  * *************************************************************************** */
 
 // Declare additional libraries
 #include <ppm.h>
 
 // Define debuging messages
-//#define DebugOn  //comment to not run debug
+#define DebugOn  //comment to not run debug
 
-#ifndef DebugOn
-#define DebugBegin(x)
-#define DebugPrint(x)
-#define DebugPrintln(x)
-#else
-#define DebugBegin(x) Serial.begin(x)
-#define DebugPrint(x) Serial.print(x)
-#define DebugPrintln(x) Serial.println(x)
-#endif
+# ifndef DebugOn
+#   define DebugBegin(x)
+#   define DebugPrint(x)
+#   define DebugPrintln(x)
+# else
+#   define DebugBegin(x) Serial.begin(x)
+#   define DebugPrint(x) Serial.print(x)
+#   define DebugPrintln(x) Serial.println(x)
+# endif
 
 
 // Define Arduino pins
@@ -53,10 +54,6 @@ static const int highPositive = 1950;  // highest signal received
 
 // Define variables
 bool carOn = false;  // kill switch
-/* We do not need this part of code (yet)
-bool motorAForward = true;  // determinate motor A direction (not to burn the motor driver)
-bool motorBForward = true;  // determinate motor B direction (not to burn the motor driver)
-*/
 
 int throttleIndex = 0;   // 0% => stop, 100% => full power
 int motorDirection = 0;  // -1 => reverse, 0 => stop, 1 => forward
@@ -108,7 +105,7 @@ void stopBothMotors(bool motorBreak) {
     digitalWrite(motorB1Pin, LOW);
     digitalWrite(motorB2Pin, LOW);
   }
-  delay(500);  // <= has to be "500" milliseconds, we are using higher delay just to debug this state
+  delay(500);  // <= has to be "500" milliseconds
 }
 
 // Initialization function, run only once
@@ -135,36 +132,7 @@ void loop() {
   getForwardReverse = (getForwardReverse < lowNegative) ? lowNegative : getForwardReverse;
   getForwardReverse = (getForwardReverse > highPositive) ? highPositive : getForwardReverse;
 
-  // Write current state of the received values => simple parsing
-  /* ***** D E P R E C A T E D - C O D E *****
-  if (carOn == true) {
-    DebugPrint("Car is ON\t|");
-  } else {
-    DebugPrint("Car is OFF\t|");
-  }
-  */
-
-  /* ***** D E P R E C A T E D - C O D E *****
-  if (getLeftRight < highNegative) {
-    DebugPrint(" Left   |");
-  } else if (getLeftRight > lowPositive) {
-    DebugPrint(" Right  |");
-  } else {
-    DebugPrint(" Center |");
-  }
-  */
-
-  /* ***** D E P R E C A T E D - C O D E *****
-  if (getForwardReverse < highNegative) {
-    DebugPrint(" Reverse |");
-  } else if (getForwardReverse > lowPositive) {
-    DebugPrint(" Forward |");
-  } else {
-    DebugPrint(" Stop    |");
-  }
-  */
-
-  // real parsing of the code, used to move the car in the desired direction
+  // parsing of the code, used to move the car in the desired direction
   if (carOn == true) {
 
     DebugPrint(F("Car is ON  |"));

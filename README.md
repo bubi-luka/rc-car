@@ -41,6 +41,9 @@
 - code optimization
 
 ## Change Log
+### 0.3.4
+- removal of deprecated code
+
 ### 0.3.3
 - reverse the turning of a car when in reverse
 
